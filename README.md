@@ -12,7 +12,7 @@ Demo: http://albumy.helloflask.com
 
 clone:
 ```
-$ git clone https://github.com/greyli/albumy.git
+$ git clone https://github.com/umar07/albumy.git
 $ cd albumy
 ```
 create & activate virtual env then install dependency:
@@ -23,10 +23,10 @@ $ python -m venv env  # use `virtualenv env` for Python2, use `python3 ...` for 
 $ source env/bin/activate  # use `env\Scripts\activate` on Windows
 $ pip install -r requirements.txt
 ```
-or with Pipenv:
+Download pretrained model:
 ```
-$ pipenv install --dev
-$ pipenv shell
+$ wget https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth
+$ wget https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt
 ```
 generate fake data then run:
 ```
