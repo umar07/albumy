@@ -7,6 +7,7 @@
 """
 import os
 
+from PIL import Image
 from flask import render_template, flash, redirect, url_for, current_app, \
     send_from_directory, request, abort, Blueprint
 from flask_login import login_required, current_user
@@ -18,6 +19,9 @@ from albumy.forms.main import DescriptionForm, TagForm, CommentForm
 from albumy.models import User, Photo, Tag, Follow, Collect, Comment, Notification
 from albumy.notifications import push_comment_notification, push_collect_notification
 from albumy.utils import rename_image, resize_image, redirect_back, flash_errors
+
+from albumy.get_ml_tags import get_tags
+from albumy.get_alternate_text import caption
 
 main_bp = Blueprint('main', __name__)
 
@@ -121,18 +125,38 @@ def get_avatar(filename):
 def upload():
     if request.method == 'POST' and 'file' in request.files:
         f = request.files.get('file')
+        img = Image.open(f)
+        # print("UMARR was here 1", type(img), img.size)
+        ml_tag_list = get_tags(img)
+        alt_text = caption(img)
+        # print("UMARRR is here",type(alt_text), alt_text)
+        # new_tag(ml_tag_list)
         filename = rename_image(f.filename)
         f.save(os.path.join(current_app.config['ALBUMY_UPLOAD_PATH'], filename))
         filename_s = resize_image(f, filename, current_app.config['ALBUMY_PHOTO_SIZE']['small'])
         filename_m = resize_image(f, filename, current_app.config['ALBUMY_PHOTO_SIZE']['medium'])
+        # print("UMARRR was here 2")
         photo = Photo(
             filename=filename,
+            description = alt_text,
             filename_s=filename_s,
             filename_m=filename_m,
-            author=current_user._get_current_object()
+            author=current_user._get_current_object(),
+            # tags = [Tag(name=x) for x in ml_tag_list]
         )
+        # for x in ml_tag_list:
+        #     tag=Tag(name=x)
+        #     photo.tags.append(tag)
+        #     db.session.commit()
+
         db.session.add(photo)
+        # photo.tags.append(ml_tag_list)
+        # db.session.commit()
         db.session.commit()
+        # print("TAGGGG ", photo.tags)
+        # print("ID ", photo.id)
+        new_tag(photo.id, ml_tag_list)
+
     return render_template('main/upload.html')
 
 
@@ -285,15 +309,28 @@ def new_comment(photo_id):
 
 @main_bp.route('/photo/<int:photo_id>/tag/new', methods=['POST'])
 @login_required
-def new_tag(photo_id):
+def new_tag(photo_id, ml_tag_list=[]):
     photo = Photo.query.get_or_404(photo_id)
+    # print(type(photo))
     if current_user != photo.author and not current_user.can('MODERATE'):
         abort(403)
+
+    for name in ml_tag_list:
+        tag = Tag.query.filter_by(name=name).first()
+        # print('UMARR was here 4', tag)
+        if tag is None:
+            tag = Tag(name=name)
+            db.session.add(tag)
+            db.session.commit()
+        if tag not in photo.tags:
+            photo.tags.append(tag)
+            db.session.commit()
 
     form = TagForm()
     if form.validate_on_submit():
         for name in form.tag.data.split():
             tag = Tag.query.filter_by(name=name).first()
+            # print('UMARR was here 4', tag)
             if tag is None:
                 tag = Tag(name=name)
                 db.session.add(tag)

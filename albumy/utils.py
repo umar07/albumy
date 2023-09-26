@@ -69,8 +69,11 @@ def rename_image(old_filename):
 
 def resize_image(image, filename, base_width):
     filename, ext = os.path.splitext(filename)
+    # print('UMARR was here 6',filename, ext)
     img = Image.open(image)
+    # print('UMARR was here 6', img.size, base_width)
     if img.size[0] <= base_width:
+        # print('UMARR was here 6', filename+ext)
         return filename + ext
     w_percent = (base_width / float(img.size[0]))
     h_size = int((float(img.size[1]) * float(w_percent)))
@@ -78,6 +81,7 @@ def resize_image(image, filename, base_width):
 
     filename += current_app.config['ALBUMY_PHOTO_SUFFIX'][base_width] + ext
     img.save(os.path.join(current_app.config['ALBUMY_UPLOAD_PATH'], filename), optimize=True, quality=85)
+    # print('UMARR was here 6',filename)
     return filename
 
 

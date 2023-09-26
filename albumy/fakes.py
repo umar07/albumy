@@ -79,6 +79,7 @@ def fake_photo(count=30):
         img = Image.new(mode='RGB', size=(800, 800), color=(r(), r(), r()))
         img.save(os.path.join(upload_path, filename))
 
+        # print("UMARR was here 1")
         photo = Photo(
             description=fake.text(),
             filename=filename,
