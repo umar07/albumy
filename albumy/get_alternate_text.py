@@ -19,7 +19,7 @@ def load_demo_image(img, image_size):
 
 def caption(img):
     image_size = 384
-    image = load_demo_image(img,image_size=image_size)
+    image = load_demo_image(img, image_size=image_size)
 
     # model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
     path = 'model_base_capfilt_large.pth'
